@@ -9,7 +9,7 @@ black = (0, 0, 0)
 yellow = (255, 255, 0)
 blue = (0, 0, 255)
 white = (255, 255, 255)
-validDotSpaces = [[(45, 45) , (75, 45) , (105, 45) , (135, 45) , (165, 45) , (195, 45) , None      , None      , (285, 45) , (315, 45) , (345, 45) , (375, 45) , (405, 45) , (435, 45)],
+validItemSpaces = [[(45, 45) , (75, 45) , (105, 45) , (135, 45) , (165, 45) , (195, 45) , None      , None      , (285, 45) , (315, 45) , (345, 45) , (375, 45) , (405, 45) , (435, 45)],
                   [(45, 75) , None     , None      , (135, 75) , None      , (195, 75) , None      , None      , (285, 75) , None      , (345, 75) , None      , None      , (435, 75)],
                   [(45, 105), (75, 105), (105, 105), (135, 105), None      , (195, 105), None      , None      , (285, 105), None      , (345, 105), (375, 105), (405, 105), (435, 105)],
                   [None     , None     , (105, 135), None      , (165, 135), (195, 135), (225, 135), (255, 135), (285, 135), (315, 135), None      , (375, 135), None      , None],
@@ -23,6 +23,8 @@ validDotSpaces = [[(45, 45) , (75, 45) , (105, 45) , (135, 45) , (165, 45) , (19
                   [(45, 375), (75, 375), (105, 375), None      , (165, 375), (195, 375), (225, 375), (255, 375), (285, 375), (315, 375), None      , (375, 375), (405, 375), (435, 375)],
                   [(45, 405), None     , None      , None      , None      , None      , (225, 405), (255, 405), None      , None      , None      , None      , None      , (435, 405)],
                   [(45, 435), (75, 435), (105, 435), (135, 435), (165, 435), (195, 435), (225, 435), (255, 435), (285, 435), (315, 435), (345, 435), (375, 435), (405, 435), (435, 435)]]
+validDotSpaces = validItemSpaces
+dots = []
 
 #initializing pygame
 pygame.init()
@@ -34,10 +36,11 @@ startButtonPressed = False
 running = True
 
 def DrawDots(spaces):
+    dots.clear()
     for i in range(len(spaces)):
         for j in range(len(spaces[i])):
             if spaces[i][j] != None:
-                pygame.draw.circle(screen, white, spaces[i][j], 5)
+                dots.append(pygame.draw.circle(screen, white, spaces[i][j], 5))
 
 #pre-game loop
 while (not startButtonPressed) and running:
@@ -58,7 +61,6 @@ while (not startButtonPressed) and running:
 
     pygame.display.flip()
 
-mazeImage = pygame.Surface.convert_alpha(pygame.image.load(os.path.join("Data", "maze.png")))
 playerPos = startPos
 vInput = 0
 hInput = 0
@@ -66,17 +68,20 @@ dt = 0
 
 #game loop
 while running:
+    #draw objects
     screen.fill(black)
-    screen.blit(mazeImage, (0, 0))
+    maze = [pygame.draw.rect(screen, blue, (0, 0, 30, 150)), pygame.draw.rect(screen, blue, (30, 0, 420, 30)), pygame.draw.rect(screen, blue, (450, 0, 30, 150)), pygame.draw.rect(screen, blue, (210, 30, 60, 90)), pygame.draw.rect(screen, blue, (30, 120, 60, 30)), pygame.draw.rect(screen, blue, (60, 150, 30, 60)), pygame.draw.rect(screen, blue, (0, 180, 60, 30)), pygame.draw.rect(screen, blue, (0, 270, 60, 30)), pygame.draw.rect(screen, blue, (60, 270, 30, 60)), pygame.draw.rect(screen, blue, (30, 330, 60, 30)), pygame.draw.rect(screen, blue, (0, 330, 30, 150)), pygame.draw.rect(screen, blue, (30, 450, 420, 30)), pygame.draw.rect(screen, blue, (450, 330, 30, 150)), pygame.draw.rect(screen, blue, (390, 330, 60, 30)), pygame.draw.rect(screen, blue, (390, 270, 30, 60)), pygame.draw.rect(screen, blue, (420, 270, 60, 30)), pygame.draw.rect(screen, blue, (420, 180, 60, 30)), pygame.draw.rect(screen, blue, (390, 150, 30, 60)), pygame.draw.rect(screen, blue, (390, 120, 60, 30)), pygame.draw.rect(screen, blue, (60, 60, 60, 30)), pygame.draw.rect(screen, blue, (150, 60, 30, 60)), pygame.draw.rect(screen, blue, (120, 120, 30, 30)), pygame.draw.rect(screen, blue, (180, 150, 120, 30)), pygame.draw.rect(screen, blue, (210, 180, 60, 30)), pygame.draw.rect(screen, blue, (120, 180, 30, 90)), pygame.draw.rect(screen, blue, (210, 240, 60, 30)), pygame.draw.rect(screen, blue, (180, 300, 120, 30)), pygame.draw.rect(screen, blue, (210, 330, 60, 30)), pygame.draw.rect(screen, blue, (120, 330, 30, 60)), pygame.draw.rect(screen, blue, (60, 390, 150, 30)), pygame.draw.rect(screen, blue, (330, 330, 30, 60)), pygame.draw.rect(screen, blue, (270, 390, 150, 30)), pygame.draw.rect(screen, blue, (330, 180, 30, 90)), pygame.draw.rect(screen, blue, (360, 60, 60, 30)), pygame.draw.rect(screen, blue, (300, 60, 30, 60)), pygame.draw.rect(screen, blue, (330, 120, 30, 30))]
     DrawDots(validDotSpaces)
     player = pygame.draw.circle(screen, yellow, playerPos, 13)
     
-    oldPos = playerPos
+    oldPos = playerPos.copy()
 
+    #make sure game closes properly
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
+    #detect input
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w] or keys[pygame.K_UP]:
         vInput = -1
@@ -90,12 +95,37 @@ while running:
     elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
         hInput = 1
         vInput = 0
+
+    print(playerPos, " current pos")
+    print(oldPos, " old pos")
+    #move player
     playerPos.x += 200 * hInput * dt
     playerPos.y += 200 * vInput * dt
+    print(playerPos, " current pos")
+    print(oldPos, " old pos")
+
+    #detect and handle dot collision
+    for dot in range(len(dots)):
+        if player.colliderect(dots[dot]):
+            validDotSpaces[int((dots[dot].y - 25)/30)][int((dots[dot].x - 25)/30)] = None
+            dots[dot] = None
+            playerScore += 10
+    if dots.__contains__(None):
+        dots.remove(None)
+    if dots == []:
+        running = False
+
+    if player.collidelist(maze) != -1:
+        print("wall")
+        print(hInput)
+        while player.collidelist(maze) != 1:
+            playerPos = oldPos.copy() + pygame.Vector2(-1 * hInput, -1 * vInput)        
+        hInput = 0
+        vInput = 0
 
     pygame.display.flip()
 
     dt = clock.tick(60) / 1000
-    
 
+print(playerScore)
 pygame.quit()
