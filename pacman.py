@@ -72,7 +72,6 @@ while running:
     screen.fill(black)
     maze = [pygame.draw.rect(screen, blue, (0, 0, 30, 150)), pygame.draw.rect(screen, blue, (30, 0, 420, 30)), pygame.draw.rect(screen, blue, (450, 0, 30, 150)), pygame.draw.rect(screen, blue, (210, 30, 60, 90)), pygame.draw.rect(screen, blue, (30, 120, 60, 30)), pygame.draw.rect(screen, blue, (60, 150, 30, 60)), pygame.draw.rect(screen, blue, (0, 180, 60, 30)), pygame.draw.rect(screen, blue, (0, 270, 60, 30)), pygame.draw.rect(screen, blue, (60, 270, 30, 60)), pygame.draw.rect(screen, blue, (30, 330, 60, 30)), pygame.draw.rect(screen, blue, (0, 330, 30, 150)), pygame.draw.rect(screen, blue, (30, 450, 420, 30)), pygame.draw.rect(screen, blue, (450, 330, 30, 150)), pygame.draw.rect(screen, blue, (390, 330, 60, 30)), pygame.draw.rect(screen, blue, (390, 270, 30, 60)), pygame.draw.rect(screen, blue, (420, 270, 60, 30)), pygame.draw.rect(screen, blue, (420, 180, 60, 30)), pygame.draw.rect(screen, blue, (390, 150, 30, 60)), pygame.draw.rect(screen, blue, (390, 120, 60, 30)), pygame.draw.rect(screen, blue, (60, 60, 60, 30)), pygame.draw.rect(screen, blue, (150, 60, 30, 60)), pygame.draw.rect(screen, blue, (120, 120, 30, 30)), pygame.draw.rect(screen, blue, (180, 150, 120, 30)), pygame.draw.rect(screen, blue, (210, 180, 60, 30)), pygame.draw.rect(screen, blue, (120, 180, 30, 90)), pygame.draw.rect(screen, blue, (210, 240, 60, 30)), pygame.draw.rect(screen, blue, (180, 300, 120, 30)), pygame.draw.rect(screen, blue, (210, 330, 60, 30)), pygame.draw.rect(screen, blue, (120, 330, 30, 60)), pygame.draw.rect(screen, blue, (60, 390, 150, 30)), pygame.draw.rect(screen, blue, (330, 330, 30, 60)), pygame.draw.rect(screen, blue, (270, 390, 150, 30)), pygame.draw.rect(screen, blue, (330, 180, 30, 90)), pygame.draw.rect(screen, blue, (360, 60, 60, 30)), pygame.draw.rect(screen, blue, (300, 60, 30, 60)), pygame.draw.rect(screen, blue, (330, 120, 30, 30))]
     DrawDots(validDotSpaces)
-    player = pygame.draw.circle(screen, yellow, playerPos, 13)
     
     oldPos = playerPos.copy()
 
@@ -96,13 +95,10 @@ while running:
         hInput = 1
         vInput = 0
 
-    print(playerPos, " current pos")
-    print(oldPos, " old pos")
     #move player
-    playerPos.x += 200 * hInput * dt
-    playerPos.y += 200 * vInput * dt
-    print(playerPos, " current pos")
-    print(oldPos, " old pos")
+    playerPos.x += 150 * hInput * dt
+    playerPos.y += 150 * vInput * dt
+    player = pygame.draw.circle(screen, yellow, playerPos, 13)
 
     #detect and handle dot collision
     for dot in range(len(dots)):
@@ -116,10 +112,10 @@ while running:
         running = False
 
     if player.collidelist(maze) != -1:
-        print("wall")
-        print(hInput)
-        while player.collidelist(maze) != 1:
-            playerPos = oldPos.copy() + pygame.Vector2(-1 * hInput, -1 * vInput)        
+        while player.collidelist(maze) != -1:
+            playerPos += pygame.Vector2(-1 * hInput, -1 * vInput)
+            player = pygame.draw.circle(screen, yellow, playerPos, 13)
+            print(playerPos)
         hInput = 0
         vInput = 0
 
