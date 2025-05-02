@@ -178,6 +178,8 @@ while running:
         quitButton = pygame.draw.rect(screen, white, (140, 315, 200, 50))
         quitButtonText = pygame.font.Font.render(pygame.font.Font(None, 50), "QUIT", False, black)
         screen.blit(quitButtonText, (quitButton.centerx - quitButtonText.get_rect().centerx, quitButton.centery - quitButtonText.get_rect().centery))
+        scoreText = pygame.font.Font.render(pygame.font.Font(None, 50), "SCORE: " + str(playerScore), False, white)
+        screen.blit(scoreText, (240 - scoreText.get_rect().centerx, 140 - scoreText.get_rect().centery))
 
         #event handling
         for event in pygame.event.get():
