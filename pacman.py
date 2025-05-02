@@ -77,6 +77,10 @@ while running:
     playerPos = startPos.copy()
     vInput = 0
     hInput = 0
+    hDir = 0
+    vDir = 0
+    oldHDir = 0
+    oldVDir = 0
     dt = 0
     showFruit = False
     fruitDelay = random.randint(2000, 5000)/1000
@@ -127,14 +131,12 @@ while running:
         for dot in range(len(dots)):
             if player.colliderect(dots[dot]):
                 validDotSpaces[int((dots[dot].y - 25)/30)][int((dots[dot].x - 25)/30)] = None
-                print(validItemSpaces[int((dots[dot].y - 25)/30)][int((dots[dot].x - 25)/30)])
                 dots[dot] = None
                 playerScore += 10
         if dots.__contains__(None):
             dots.remove(None)
         if dots == []:
             gameRunning = False
-        print(10)
 
         #fruit collision
         if player.collidelist(fruit) != -1 and showFruit:
@@ -142,29 +144,38 @@ while running:
             playerScore += 50
             fruitPos = SpawnFruit()
             fruitDelay = random.randint(2000, 5000)/1000
-        print(11)
 
         #wall collision
         if player.collidelist(maze) != -1:
             playerPos = oldPos.copy()
-            hInput = 0
-            vInput = 0
-        print(12)
+            if oldHDir != hInput and oldVDir != vInput and vInput + hInput != 0:
+                screen.fill(black, player)
+                playerPos.x += 150 * oldHDir * dt
+                playerPos.y += 150 * oldVDir * dt
+                player = pygame.draw.circle(screen, yellow, playerPos, 14)
+                if player.collidelist(maze) != -1:
+                    screen.fill(black, player)
+                    playerPos = oldPos.copy()
+                    hInput = 0
+                    vInput = 0
+                    player = pygame.draw.circle(screen, yellow, playerPos, 14)
+            else:
+                hInput = 0
+                vInput = 0
+        else:
+            oldHDir = hInput
+            oldVDir = vInput
 
         #teleportation
         if player.colliderect(leftTP):
             playerPos = pygame.Vector2(466, 225)
         if player.colliderect(rightTP):
             playerPos = pygame.Vector2(14, 225)
-        print(13)
 
         pygame.display.flip()
-        print(14)
 
         dt = clock.tick(60) / 1000
-        print(15)
         fruitDelay -= dt
-        print(16)
     
     restartButtonPressed = False
 
@@ -188,6 +199,7 @@ while running:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if pygame.mouse.get_pos()[0] < restartButton.right and pygame.mouse.get_pos()[0] > restartButton.left and pygame.mouse.get_pos()[1] < restartButton.bottom and pygame.mouse.get_pos()[1] > restartButton.top:
                     validDotSpaces = copy.deepcopy(validItemSpaces)
+                    playerScore = 0
                     restartButtonPressed = True
                     gameRunning = True
                     print("pressed")
@@ -197,6 +209,5 @@ while running:
 
         pygame.display.flip()
         dt = clock.tick(60) / 1000
-    print("post game loop end")
 
 pygame.quit()
