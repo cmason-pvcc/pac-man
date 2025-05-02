@@ -2,6 +2,7 @@ import pygame
 import sys
 import os
 import random
+import copy
 
 #setting variables
 playerScore = 0
@@ -26,7 +27,7 @@ validItemSpaces = [[(45, 45) , (75, 45) , (105, 45) , (135, 45) , (165, 45) , (1
                   [(45, 375), (75, 375), (105, 375), None      , None      , (195, 375), (225, 375), (255, 375), (285, 375), None      , None      , (375, 375), (405, 375), (435, 375)],
                   [(45, 405), None     , None      , None      , None      , None      , (225, 405), None      , None      , None      , None      , None      , None      , (435, 405)],
                   [(45, 435), (75, 435), (105, 435), (135, 435), (165, 435), (195, 435), (225, 435), (255, 435), (285, 435), (315, 435), (345, 435), (375, 435), (405, 435), (435, 435)]]
-validDotSpaces = validItemSpaces
+validDotSpaces = copy.deepcopy(validItemSpaces)
 dots = []
 
 #initializing pygame
@@ -37,6 +38,7 @@ pygame.font.init()
 pygame.display.init()
 startButtonPressed = False
 running = True
+gameRunning = False
 
 def DrawDots(spaces):
     dots.clear()
@@ -45,113 +47,154 @@ def DrawDots(spaces):
             if spaces[i][j] != None:
                 dots.append(pygame.draw.circle(screen, white, spaces[i][j], 5))
 
+def SpawnFruit():
+    fruitPos = validItemSpaces[random.randint(0, 13)][random.randint(0, 13)]
+    if fruitPos == None:
+        while fruitPos == None:
+            fruitPos = validItemSpaces[random.randint(0, 13)][random.randint(0, 13)]
+    return fruitPos
+
 #pre-game loop
 while (not startButtonPressed) and running:
     #rendering
     screen.fill(black)
     startButton = pygame.draw.rect(screen, white, (140, 215, 200, 50))
     startButtonText = pygame.font.Font.render(pygame.font.Font(None, 50), "START", False, black)
-    screen.blit(startButtonText, (240 - startButtonText.get_rect().centerx, 240 - startButtonText.get_rect().centery))
+    screen.blit(startButtonText, (startButton.centerx - startButtonText.get_rect().centerx, startButton.centery - startButtonText.get_rect().centery))
 
     #event handling
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if pygame.mouse.get_pos()[0] < 340 and pygame.mouse.get_pos()[0] > 140 and pygame.mouse.get_pos()[1] < 265 and pygame.mouse.get_pos()[1] > 215:
+            if pygame.mouse.get_pos()[0] < startButton.right and pygame.mouse.get_pos()[0] > startButton.left and pygame.mouse.get_pos()[1] < startButton.bottom and pygame.mouse.get_pos()[1] > startButton.top:
                 startButtonPressed = True
-                print("pressed")
+                gameRunning = True
 
     pygame.display.flip()
 
-playerPos = startPos
-vInput = 0
-hInput = 0
-dt = 0
-showFruit = False
-fruitDelay = random.randint(2000, 5000)/1000
-fruitPos = validItemSpaces[random.randint(0, 13)][random.randint(0, 13)]
-if fruitPos == None:
-    while fruitPos == None:
-        fruitPos = validItemSpaces[random.randint(0, 13)][random.randint(0, 13)]
-fruit = [pygame.draw.rect(screen, green, (-100, 0, 1, 1))]
-
-#game loop
 while running:
-    #draw objects
-    screen.fill(black)
-    maze = [pygame.draw.rect(screen, blue, (0, 0, 30, 150)), pygame.draw.rect(screen, blue, (30, 0, 420, 30)), pygame.draw.rect(screen, blue, (450, 0, 30, 150)), pygame.draw.rect(screen, blue, (210, 30, 60, 90)), pygame.draw.rect(screen, blue, (30, 120, 60, 30)), pygame.draw.rect(screen, blue, (60, 150, 30, 60)), pygame.draw.rect(screen, blue, (0, 180, 60, 30)), pygame.draw.rect(screen, blue, (0, 240, 60, 30)), pygame.draw.rect(screen, blue, (60, 240, 30, 90)), pygame.draw.rect(screen, blue, (30, 330, 60, 30)), pygame.draw.rect(screen, blue, (0, 330, 30, 150)), pygame.draw.rect(screen, blue, (30, 450, 420, 30)), pygame.draw.rect(screen, blue, (450, 330, 30, 150)), pygame.draw.rect(screen, blue, (390, 330, 60, 30)), pygame.draw.rect(screen, blue, (390, 240, 30, 90)), pygame.draw.rect(screen, blue, (420, 240, 60, 30)), pygame.draw.rect(screen, blue, (420, 180, 60, 30)), pygame.draw.rect(screen, blue, (390, 150, 30, 60)), pygame.draw.rect(screen, blue, (390, 120, 60, 30)), pygame.draw.rect(screen, blue, (60, 60, 60, 30)), pygame.draw.rect(screen, blue, (150, 60, 30, 60)), pygame.draw.rect(screen, blue, (120, 120, 30, 60)), pygame.draw.rect(screen, blue, (180, 150, 120, 30)), pygame.draw.rect(screen, blue, (210, 180, 60, 30)), pygame.draw.rect(screen, blue, (120, 210, 60, 60)), pygame.draw.rect(screen, blue, (210, 240, 60, 30)), pygame.draw.rect(screen, blue, (180, 300, 120, 30)), pygame.draw.rect(screen, blue, (210, 330, 60, 30)), pygame.draw.rect(screen, blue, (120, 300, 30, 90)), pygame.draw.rect(screen, blue, (60, 390, 150, 30)), pygame.draw.rect(screen, blue, (330, 300, 30, 90)), pygame.draw.rect(screen, blue, (240, 390, 180, 30)), pygame.draw.rect(screen, blue, (300, 210, 60, 60)), pygame.draw.rect(screen, blue, (360, 60, 60, 30)), pygame.draw.rect(screen, blue, (300, 60, 30, 60)), pygame.draw.rect(screen, blue, (330, 120, 30, 60)), pygame.draw.rect(screen, blue, (150, 360, 30, 30)), pygame.draw.rect(screen, blue, (300, 360, 30, 30))]
-    leftTP = pygame.draw.rect(screen, black, (0, 210, 1, 30))
-    rightTP = pygame.draw.rect(screen, black, (479, 210, 1, 30))
-    DrawDots(validDotSpaces)
-    if fruitDelay <= 0:
-        showFruit = True
-    if showFruit:
-        fruit = [pygame.draw.rect(screen, white, (fruitPos[0], fruitPos[1] - 12, 2, 4)), pygame.draw.rect(screen, green, (fruitPos[0] - 6, fruitPos[1] - 10, 6, 2)), pygame.draw.rect(screen, green, (fruitPos[0] + 2, fruitPos[1] - 10, 6, 2)), pygame.draw.rect(screen, green, (fruitPos[0] - 4, fruitPos[1] - 8, 10, 2)), pygame.draw.rect(screen, green, (fruitPos[0], fruitPos[1] - 6, 2, 2)), pygame.draw.rect(screen, red, (fruitPos[0] - 10, fruitPos[1] - 6, 2, 8)), pygame.draw.rect(screen, red, (fruitPos[0] - 8, fruitPos[1] - 8, 2, 14)), pygame.draw.rect(screen, red, (fruitPos[0] - 6, fruitPos[1] - 8, 2, 16)), pygame.draw.rect(screen, red, (fruitPos[0] - 4, fruitPos[1] - 6, 4, 16)), pygame.draw.rect(screen, red, (fruitPos[0], fruitPos[1] - 4, 2, 16)), pygame.draw.rect(screen, red, (fruitPos[0] + 2, fruitPos[1] - 6, 4, 16)), pygame.draw.rect(screen, red, (fruitPos[0] + 6, fruitPos[1] - 8, 4, 14)), pygame.draw.rect(screen, red, (fruitPos[0] + 10, fruitPos[1] - 6, 2, 8)), pygame.draw.rect(screen, white, (fruitPos[0] - 8, fruitPos[1] - 4, 2, 2)), pygame.draw.rect(screen, white, (fruitPos[0] - 6, fruitPos[1] + 2, 2, 2)), pygame.draw.rect(screen, white, (fruitPos[0] - 4, fruitPos[1] - 2, 2, 2)), pygame.draw.rect(screen, white, (fruitPos[0] - 2, fruitPos[1] + 6, 2, 2)), pygame.draw.rect(screen, white, (fruitPos[0], fruitPos[1] - 2, 2, 2)), pygame.draw.rect(screen, white, (fruitPos[0], fruitPos[1] + 2, 2, 2)), pygame.draw.rect(screen, white, (fruitPos[0] + 4, fruitPos[1] - 4, 2, 2)), pygame.draw.rect(screen, white, (fruitPos[0] + 4, fruitPos[1] + 6, 2, 2)), pygame.draw.rect(screen, white, (fruitPos[0] + 6, fruitPos[1], 2, 2)), pygame.draw.rect(screen, white, (fruitPos[0] + 8, fruitPos[1] - 6, 2, 2))]
+    playerPos = startPos.copy()
+    vInput = 0
+    hInput = 0
+    dt = 0
+    showFruit = False
+    fruitDelay = random.randint(2000, 5000)/1000
+    fruitPos = SpawnFruit()
+    fruit = [pygame.draw.rect(screen, green, (-100, 0, 1, 1))]
+
+    #game loop
+    while gameRunning and running:
+        #draw objects
+        screen.fill(black)
+        maze = [pygame.draw.rect(screen, blue, (0, 0, 30, 150)), pygame.draw.rect(screen, blue, (30, 0, 420, 30)), pygame.draw.rect(screen, blue, (450, 0, 30, 150)), pygame.draw.rect(screen, blue, (210, 30, 60, 90)), pygame.draw.rect(screen, blue, (30, 120, 60, 30)), pygame.draw.rect(screen, blue, (60, 150, 30, 60)), pygame.draw.rect(screen, blue, (0, 180, 60, 30)), pygame.draw.rect(screen, blue, (0, 240, 60, 30)), pygame.draw.rect(screen, blue, (60, 240, 30, 90)), pygame.draw.rect(screen, blue, (30, 330, 60, 30)), pygame.draw.rect(screen, blue, (0, 330, 30, 150)), pygame.draw.rect(screen, blue, (30, 450, 420, 30)), pygame.draw.rect(screen, blue, (450, 330, 30, 150)), pygame.draw.rect(screen, blue, (390, 330, 60, 30)), pygame.draw.rect(screen, blue, (390, 240, 30, 90)), pygame.draw.rect(screen, blue, (420, 240, 60, 30)), pygame.draw.rect(screen, blue, (420, 180, 60, 30)), pygame.draw.rect(screen, blue, (390, 150, 30, 60)), pygame.draw.rect(screen, blue, (390, 120, 60, 30)), pygame.draw.rect(screen, blue, (60, 60, 60, 30)), pygame.draw.rect(screen, blue, (150, 60, 30, 60)), pygame.draw.rect(screen, blue, (120, 120, 30, 60)), pygame.draw.rect(screen, blue, (180, 150, 120, 30)), pygame.draw.rect(screen, blue, (210, 180, 60, 30)), pygame.draw.rect(screen, blue, (120, 210, 60, 60)), pygame.draw.rect(screen, blue, (210, 240, 60, 30)), pygame.draw.rect(screen, blue, (180, 300, 120, 30)), pygame.draw.rect(screen, blue, (210, 330, 60, 30)), pygame.draw.rect(screen, blue, (120, 300, 30, 90)), pygame.draw.rect(screen, blue, (60, 390, 150, 30)), pygame.draw.rect(screen, blue, (330, 300, 30, 90)), pygame.draw.rect(screen, blue, (240, 390, 180, 30)), pygame.draw.rect(screen, blue, (300, 210, 60, 60)), pygame.draw.rect(screen, blue, (360, 60, 60, 30)), pygame.draw.rect(screen, blue, (300, 60, 30, 60)), pygame.draw.rect(screen, blue, (330, 120, 30, 60)), pygame.draw.rect(screen, blue, (150, 360, 30, 30)), pygame.draw.rect(screen, blue, (300, 360, 30, 30))]
+        leftTP = pygame.draw.rect(screen, black, (0, 210, 1, 30))
+        rightTP = pygame.draw.rect(screen, black, (479, 210, 1, 30))
+        DrawDots(validDotSpaces)
+        if fruitDelay <= 0:
+            showFruit = True
+        if showFruit:
+            fruit = [pygame.draw.rect(screen, white, (fruitPos[0], fruitPos[1] - 12, 2, 4)), pygame.draw.rect(screen, green, (fruitPos[0] - 6, fruitPos[1] - 10, 6, 2)), pygame.draw.rect(screen, green, (fruitPos[0] + 2, fruitPos[1] - 10, 6, 2)), pygame.draw.rect(screen, green, (fruitPos[0] - 4, fruitPos[1] - 8, 10, 2)), pygame.draw.rect(screen, green, (fruitPos[0], fruitPos[1] - 6, 2, 2)), pygame.draw.rect(screen, red, (fruitPos[0] - 10, fruitPos[1] - 6, 2, 8)), pygame.draw.rect(screen, red, (fruitPos[0] - 8, fruitPos[1] - 8, 2, 14)), pygame.draw.rect(screen, red, (fruitPos[0] - 6, fruitPos[1] - 8, 2, 16)), pygame.draw.rect(screen, red, (fruitPos[0] - 4, fruitPos[1] - 6, 4, 16)), pygame.draw.rect(screen, red, (fruitPos[0], fruitPos[1] - 4, 2, 16)), pygame.draw.rect(screen, red, (fruitPos[0] + 2, fruitPos[1] - 6, 4, 16)), pygame.draw.rect(screen, red, (fruitPos[0] + 6, fruitPos[1] - 8, 4, 14)), pygame.draw.rect(screen, red, (fruitPos[0] + 10, fruitPos[1] - 6, 2, 8)), pygame.draw.rect(screen, white, (fruitPos[0] - 8, fruitPos[1] - 4, 2, 2)), pygame.draw.rect(screen, white, (fruitPos[0] - 6, fruitPos[1] + 2, 2, 2)), pygame.draw.rect(screen, white, (fruitPos[0] - 4, fruitPos[1] - 2, 2, 2)), pygame.draw.rect(screen, white, (fruitPos[0] - 2, fruitPos[1] + 6, 2, 2)), pygame.draw.rect(screen, white, (fruitPos[0], fruitPos[1] - 2, 2, 2)), pygame.draw.rect(screen, white, (fruitPos[0], fruitPos[1] + 2, 2, 2)), pygame.draw.rect(screen, white, (fruitPos[0] + 4, fruitPos[1] - 4, 2, 2)), pygame.draw.rect(screen, white, (fruitPos[0] + 4, fruitPos[1] + 6, 2, 2)), pygame.draw.rect(screen, white, (fruitPos[0] + 6, fruitPos[1], 2, 2)), pygame.draw.rect(screen, white, (fruitPos[0] + 8, fruitPos[1] - 6, 2, 2))]
+
+        oldPos = playerPos.copy()
+
+        #make sure game closes properly
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        #detect input
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_w] or keys[pygame.K_UP]:
+            vInput = -1
+            hInput = 0
+        elif keys[pygame.K_s] or keys[pygame.K_DOWN]:
+            vInput = 1
+            hInput = 0
+        elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
+            hInput = -1
+            vInput = 0
+        elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+            hInput = 1
+            vInput = 0
+
+        #move player
+        playerPos.x += 150 * hInput * dt
+        playerPos.y += 150 * vInput * dt
+        player = pygame.draw.circle(screen, yellow, playerPos, 14)
+
+        #detect and handle dot collision
+        for dot in range(len(dots)):
+            if player.colliderect(dots[dot]):
+                validDotSpaces[int((dots[dot].y - 25)/30)][int((dots[dot].x - 25)/30)] = None
+                print(validItemSpaces[int((dots[dot].y - 25)/30)][int((dots[dot].x - 25)/30)])
+                dots[dot] = None
+                playerScore += 10
+        if dots.__contains__(None):
+            dots.remove(None)
+        if dots == []:
+            gameRunning = False
+        print(10)
+
+        #fruit collision
+        if player.collidelist(fruit) != -1 and showFruit:
+            showFruit = False
+            playerScore += 50
+            fruitPos = SpawnFruit()
+            fruitDelay = random.randint(2000, 5000)/1000
+        print(11)
+
+        #wall collision
+        if player.collidelist(maze) != -1:
+            playerPos = oldPos.copy()
+            hInput = 0
+            vInput = 0
+        print(12)
+
+        #teleportation
+        if player.colliderect(leftTP):
+            playerPos = pygame.Vector2(466, 225)
+        if player.colliderect(rightTP):
+            playerPos = pygame.Vector2(14, 225)
+        print(13)
+
+        pygame.display.flip()
+        print(14)
+
+        dt = clock.tick(60) / 1000
+        print(15)
+        fruitDelay -= dt
+        print(16)
     
-    oldPos = playerPos.copy()
+    restartButtonPressed = False
 
-    #make sure game closes properly
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+    #post-game loop
+    while (not restartButtonPressed) and running:
+        #rendering
+        screen.fill(black)
+        restartButton = pygame.draw.rect(screen, white, (140, 215, 200, 50))
+        restartButtonText = pygame.font.Font.render(pygame.font.Font(None, 50), "RESTART", False, black)
+        screen.blit(restartButtonText, (restartButton.centerx - restartButtonText.get_rect().centerx, restartButton.centery - restartButtonText.get_rect().centery))
+        quitButton = pygame.draw.rect(screen, white, (140, 315, 200, 50))
+        quitButtonText = pygame.font.Font.render(pygame.font.Font(None, 50), "QUIT", False, black)
+        screen.blit(quitButtonText, (quitButton.centerx - quitButtonText.get_rect().centerx, quitButton.centery - quitButtonText.get_rect().centery))
 
-    #detect input
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_w] or keys[pygame.K_UP]:
-        vInput = -1
-        hInput = 0
-    elif keys[pygame.K_s] or keys[pygame.K_DOWN]:
-        vInput = 1
-        hInput = 0
-    elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
-        hInput = -1
-        vInput = 0
-    elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-        hInput = 1
-        vInput = 0
+        #event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if pygame.mouse.get_pos()[0] < restartButton.right and pygame.mouse.get_pos()[0] > restartButton.left and pygame.mouse.get_pos()[1] < restartButton.bottom and pygame.mouse.get_pos()[1] > restartButton.top:
+                    validDotSpaces = copy.deepcopy(validItemSpaces)
+                    restartButtonPressed = True
+                    gameRunning = True
+                    print("pressed")
+                elif pygame.mouse.get_pos()[0] < quitButton.right and pygame.mouse.get_pos()[0] > quitButton.left and pygame.mouse.get_pos()[1] < quitButton.bottom and pygame.mouse.get_pos()[1] > quitButton.top:
+                    running = False
+                    print("pressed")
 
-    #move player
-    playerPos.x += 150 * hInput * dt
-    playerPos.y += 150 * vInput * dt
-    player = pygame.draw.circle(screen, yellow, playerPos, 14)
+        pygame.display.flip()
+        dt = clock.tick(60) / 1000
+    print("post game loop end")
 
-    #detect and handle dot collision
-    for dot in range(len(dots)):
-        if player.colliderect(dots[dot]):
-            validDotSpaces[int((dots[dot].y - 25)/30)][int((dots[dot].x - 25)/30)] = None
-            dots[dot] = None
-            playerScore += 10
-    if dots.__contains__(None):
-        dots.remove(None)
-    if dots == []:
-        running = False
-
-    if player.collidelist(fruit) != -1 and showFruit:
-        showFruit = False
-        playerScore += 50
-        fruitPos = validItemSpaces[random.randint(0, 13)][random.randint(0, 13)]
-        if fruitPos == None:
-            while fruitPos == None:
-                fruitPos = validItemSpaces[random.randint(0, 13)][random.randint(0, 13)]
-        fruitDelay = random.randint(2000, 5000)/1000        
-
-    #wall collision
-    if player.collidelist(maze) != -1:
-        playerPos = oldPos.copy()
-        hInput = 0
-        vInput = 0
-
-    #teleportation
-    if player.colliderect(leftTP):
-        playerPos = pygame.Vector2(466, 225)
-    if player.colliderect(rightTP):
-        playerPos = pygame.Vector2(14, 225)
-
-    pygame.display.flip()
-
-    dt = clock.tick(60) / 1000
-    fruitDelay -= dt
-
-print(playerScore)
 pygame.quit()
