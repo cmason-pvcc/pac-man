@@ -1,3 +1,4 @@
+Design Document:  
 Project Functionality:  
   The game has a screen with a button that, when pressed, starts the game. When the game starts, the play area will be drawn,
   dots will be drawn in valid spaces in the play area, and the player character will be drawn. The player character will move
@@ -12,7 +13,7 @@ Design Process:
   is made and would still have satisfied the requirements, but I decided to be more accurate to the original Pacman. The play
   area was my attempt to recreate a simpler version of the maze from the original Pacman but without the cage for the ghosts.
   I chose the number of points awarded so that the score can easily reach triple digits while still being readable and with low
-  likelyhood of a score that is too high to mean much.  
+  likelyhood of a score that is too high to mean much. Because I had trouble moving into on-block gaps while testing, I decided to add input-buffering in order tomake that easier, which is also closer to the original Pacman.  
   
 Requirements:  
   Board Size / Play Area:  
